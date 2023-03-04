@@ -1,6 +1,8 @@
 package com.promineotech.jeep.entity;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,13 +43,38 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Jeep {
+public class Jeep implements Comparable<Jeep> {
   // He set modelPK to Long in the video. I set it to int to match the table.
   private int modelPK;
-  private String modelId;
+  private JeepModel modelId;
   private String trimLevel;
   private int numDoors;
   private int wheelSize;
   private BigDecimal basePrice;
+
+  /*
+   * Added to fix modelPK issue with FetchJeepTest
+   * 
+   * When Jackson is serializing this object into JSON, it will ignore/leave out the modelPK. Going
+   * the other way, from JSON to Jeep object, if Jackson finds a modelPK, it will populate it in the
+   * object.
+   * 
+   * This is because the @JsonIgnore is only on the getter, not the setter.
+   */
+  @JsonIgnore
+  public int getModelPK() {
+    return modelPK;
+  }
+
+  @Override
+  public int compareTo(Jeep that) {
+    // @formatter:off
+    return Comparator
+        .comparing(Jeep::getModelId)
+        .thenComparing(Jeep::getTrimLevel)
+        .thenComparing(Jeep::getNumDoors)
+        .compare(this, that);
+    // @formatter:on
+  } // end compareTo
 
 } // end CLASS
