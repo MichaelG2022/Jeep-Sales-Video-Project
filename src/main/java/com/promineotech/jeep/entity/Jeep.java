@@ -45,7 +45,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Jeep implements Comparable<Jeep> {
   // He set modelPK to Long in the video. I set it to int to match the table.
-  private int modelPK;
+  private Long modelPK;
   private JeepModel modelId;
   private String trimLevel;
   private int numDoors;
@@ -62,9 +62,9 @@ public class Jeep implements Comparable<Jeep> {
    * This is because the @JsonIgnore is only on the getter, not the setter.
    */
   @JsonIgnore
-  public int getModelPK() {
+  public Long getModelPK() {
     return modelPK;
-  }
+  } // end getModelPK
 
   @Override
   public int compareTo(Jeep that) {

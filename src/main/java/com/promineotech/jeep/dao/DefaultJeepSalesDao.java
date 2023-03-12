@@ -57,7 +57,7 @@ public class DefaultJeepSalesDao implements JeepSalesDao {
         @Override
         public Jeep mapRow(ResultSet rs, int rowNum) throws SQLException {
           return Jeep.builder()
-            .modelPK(rs.getInt("model_pk"))
+            .modelPK(rs.getLong("model_pk"))
             .modelId(JeepModel.valueOf(rs.getString("model_id")))
             .trimLevel(rs.getString("trim_level"))
             .numDoors(rs.getInt("num_doors"))

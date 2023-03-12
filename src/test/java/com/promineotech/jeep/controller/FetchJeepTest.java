@@ -27,14 +27,6 @@ import com.promineotech.jeep.entity.Jeep;
 import com.promineotech.jeep.entity.JeepModel;
 import com.promineotech.jeep.service.JeepSalesService;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-// @formatter:off
-@Sql(
-    scripts = {"classpath:flyway/migrations/V1.0__Jeep_Schema.sql",
-               "classpath:flyway/migrations/V1.1__Jeep_Data.sql"},
-    config = @SqlConfig(encoding = "utf-8"))
-// @formatter:on
 class FetchJeepTest {
 
   /*
@@ -74,7 +66,7 @@ class FetchJeepTest {
       // Given: a valid model, trim, and URI
       JeepModel model = JeepModel.WRANGLER;
       String trim = "Sport";
-      String uri = String.format("%s?model=%s&trim=%s", getBaseUri(), model, trim);
+      String uri = String.format("%s?model=%s&trim=%s", getBaseUriForJeeps(), model, trim);
 
       // Added only for testing
       // System.out.println(uri);
@@ -97,7 +89,7 @@ class FetchJeepTest {
        * The following line was added and the assertThat modified to match to try to fix issues with
        * modelPK during the test.
        */
-      // List<Jeep> actual = response.getBody();
+      List<Jeep> actual = response.getBody();
 
       List<Jeep> expected = buildExpected();
 
@@ -120,7 +112,7 @@ class FetchJeepTest {
        * This was the original line before we fixed the modelPK test issue by setting the modelPK in
        * "actual" to 0.
        */
-      assertThat(response.getBody()).isEqualTo(expected);
+      assertThat(actual).isEqualTo(expected);
 
     } // end testThatJeepsAreReturnedWhenAValidModelAndTrimAreSupplied
 
@@ -131,8 +123,8 @@ class FetchJeepTest {
     void testThatAnErrorMessageIsReturnedWhenAnUnkownTrimIsSupplied() {
       // Given: a valid model and URI and unknown trim
       JeepModel model = JeepModel.WRANGLER;
-      String trim = "Invalid value";
-      String uri = String.format("%s?model=%s&trim=%s", getBaseUri(), model, trim);
+      String trim = "Unknown value";
+      String uri = String.format("%s?model=%s&trim=%s", getBaseUriForJeeps(), model, trim);
 
       // @formatter:off
       // When: a connection is made to the URI
@@ -158,8 +150,8 @@ class FetchJeepTest {
     void testThatAnErrorMessageIsReturnedWhenAnInvalidValueIsSupplied(String model, String trim,
         String reason) {
 
-      // Given: a valid model and URI and unknown trim
-      String uri = String.format("%s?model=%s&trim=%s", getBaseUri(), model, trim);
+      // Given: a valid model and URI and invalid trim
+      String uri = String.format("%s?model=%s&trim=%s", getBaseUriForJeeps(), model, trim);
 
       // When: a connection is made to the URI
       ResponseEntity<Map<String, Object>> response = getRestTemplate().exchange(uri, HttpMethod.GET,
@@ -203,7 +195,8 @@ class FetchJeepTest {
       config = @SqlConfig(encoding = "utf-8"))
   // @formatter:on
   class TestsThatPolluteTheApplicationContext extends FetchJeepTestSupport {
-    // Creates mock JeepSalesService bean in Bean Registry, replacing any bean of the same name
+    // Creates mock JeepSalesService bean in Bean Registry, replacing any bean of the same name.
+    // This pollutes the registry for all other tests which is why it is separated from the others.
     @MockBean
     private JeepSalesService jeepSalesService;
 
@@ -214,8 +207,8 @@ class FetchJeepTest {
     void testThatAnUnplannerErrorResultsInA500Status() {
       // Given: a valid model and URI and unknown trim
       JeepModel model = JeepModel.WRANGLER;
-      String trim = "Honda";
-      String uri = String.format("%s?model=%s&trim=%s", getBaseUri(), model, trim);
+      String trim = "Sport";
+      String uri = String.format("%s?model=%s&trim=%s", getBaseUriForJeeps(), model, trim);
 
       // Programming Mock Bean
       // @formatter:off
